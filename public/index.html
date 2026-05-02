@@ -3,18 +3,52 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
-  <title>Gemini AI Chatbot</title>
+  <title>Modern AI Chatbot</title>
+
   <link rel="stylesheet" href="style.css"/>
+
+  <!-- Markdown -->
+  <script src="https://cdn.jsdelivr.net/npm/marked/marked.min.js"></script>
+
+  <!-- Emoji -->
+  <script src="https://cdn.jsdelivr.net/npm/emoji-picker-element@^1/index.js" type="module"></script>
 </head>
+
 <body>
-  <div class="container">
-    <h1>Gemini AI Chatbot</h1>
-    <div id="chat-box" class="chat-box"></div>
-    <form id="chat-form">
-      <input type="text" id="user-input" placeholder="Type your message..." autocomplete="off" required />
-      <button type="submit">Send</button>
-    </form>
+
+<div class="chat-container">
+
+  <!-- HEADER -->
+  <div class="chat-header">
+    <span>🤖 SGK Food Chatbot</span>
+    <button id="toggle-theme">🌙</button>
   </div>
-  <script src="script.js"></script>
+
+  <!-- CHAT -->
+  <div id="chat-box" class="chat-box"></div>
+
+  <!-- INPUT -->
+  <div class="chat-input-container">
+    
+    <button id="emoji-btn">😀</button>
+
+    <form id="chat-form">
+      <textarea 
+        id="user-input"
+        placeholder="Ketik pesan..."
+        rows="1"
+      ></textarea>
+    </form>
+
+    <button id="send-btn">➤</button>
+
+  </div>
+
+  <!-- Emoji Picker -->
+  <emoji-picker id="emoji-picker"></emoji-picker>
+
+</div>
+
+<script src="script.js"></script>
 </body>
 </html>

@@ -37,11 +37,11 @@ app.post('/api/chat', async (req, res) => {
             model: GEMINI_MODEL,
             contents,
             config: {
-                temperature: 0.7,
+                temperature: 0.8,
                 topP: 0.5,
                 systemInstruction: `
-                    Anda adalah asisten travel yang ramah, tanyakan kepada user ingin liburan kemana dan berapa lama,
-                    lalu buatkan itinerary berdasarkan lokasi dan lamanya liburan mereka, jawab hanya pertanyaan terkait travelling.
+                    Anda adalah Customer Service Pemesanan Makanan SGK Food yang ramah, tanyakan kepada user ingin Pesan makanan apa dan tunjukkan list makanannya Nasi goreng, ayam goreng, minuman,
+                    lalu buatkan itinerary Ada yang bisa saya bantu terkait pesanan makanan, jawab hanya pertanyaan terkait pesanan lalu jumlah total semua dan metode pembayaran,jika user ada refisi bisa menyesuaikan pesanannya.
                 `
             }
         })

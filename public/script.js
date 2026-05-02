@@ -1,51 +1,132 @@
-const form = document.getElementById('chat-form');
-const input = document.getElementById('user-input');
 const chatBox = document.getElementById('chat-box');
+const input = document.getElementById('user-input');
+const form = document.getElementById('chat-form');
+const sendBtn = document.getElementById('send-btn');
+const emojiBtn = document.getElementById('emoji-btn');
+const picker = document.getElementById('emoji-picker');
+const toggleTheme = document.getElementById('toggle-theme');
 
-// Maintain the conversation history for context-aware replies
 let conversation = [];
 
-form.addEventListener('submit', async function (e) {
-  e.preventDefault();
+/* SEND MESSAGE */
+function sendMessage() {
+  const text = input.value.trim();
+  if (!text) return;
 
-  const userMessage = input.value.trim();
-  if (!userMessage) return;
+  addMessage('user', text);
+  conversation.push({ role: 'user', text });
 
-  // Add user message to UI and history
-  appendMessage('user', userMessage);
-  conversation.push({ role: 'user', text: userMessage });
   input.value = '';
 
-  // Show a temporary "Thinking..." message and keep a reference to its element
-  const thinkingMessage = appendMessage('model', 'Thinking...');
+  const thinking = addMessage('bot', 'Typing...');
 
-  try {
-    const response = await fetch('/api/chat', {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ conversation })
-    });
+  fetch('/api/chat', {
+    method: 'POST',
+    headers: {'Content-Type':'application/json'},
+    body: JSON.stringify({ conversation })
+  })
+  .then(res => res.json())
+  .then(data => {
+    const reply = data.result || 'No response';
+    typeEffect(thinking, reply);
+    conversation.push({ role: 'model', text: reply });
+  })
+  .catch(() => {
+    thinking.textContent = 'Error server';
+  });
+}
 
-    const data = await response.json();
+/* EVENT */
+form.addEventListener('submit', e => {
+  e.preventDefault();
+  sendMessage();
+});
 
-    if (response.ok && data.result) {
-      // Replace "Thinking..." with the actual AI response
-      thinkingMessage.textContent = data.result;
-      conversation.push({ role: 'model', text: data.result });
-    } else {
-      thinkingMessage.textContent = 'Sorry, no response received.';
-    }
-  } catch (error) {
-    thinkingMessage.textContent = 'Failed to get response from server.';
-    console.error('Chat error:', error);
+sendBtn.onclick = sendMessage;
+
+/* ENTER = SEND */
+input.addEventListener('keypress', e => {
+  if (e.key === 'Enter') {
+    e.preventDefault();
+    sendMessage();
   }
 });
 
-function appendMessage(sender, text) {
+/* ADD MESSAGE */
+function addMessage(role, text) {
+  const row = document.createElement('div');
+  row.className = `message-row ${role === 'user' ? 'user-row' : ''}`;
+
+  const avatar = document.createElement('div');
+  avatar.className = 'avatar';
+  avatar.textContent = role === 'user' ? '🧑' : '🤖';
+
   const msg = document.createElement('div');
-  msg.classList.add('message', sender);
-  msg.textContent = text;
-  chatBox.appendChild(msg);
-  chatBox.scrollTop = chatBox.scrollHeight;
+  msg.className = `message ${role === 'user' ? 'user' : 'bot'}`;
+
+  // Markdown render
+  msg.innerHTML = marked.parse(text);
+
+  if (role === 'user') {
+    row.appendChild(msg);
+    row.appendChild(avatar);
+  } else {
+    row.appendChild(avatar);
+    row.appendChild(msg);
+  }
+
+  chatBox.appendChild(row);
+  scrollBottom();
+
   return msg;
 }
+
+/* AUTO RESIZE TEXTAREA */
+input.addEventListener('input', () => {
+  input.style.height = 'auto';
+  input.style.height = input.scrollHeight + 'px';
+});
+
+input.addEventListener('keydown', e => {
+  if (e.key === 'Enter' && !e.shiftKey) {
+    e.preventDefault();
+    sendMessage();
+  }
+});
+
+
+/* AUTO SCROLL */
+function scrollBottom() {
+  chatBox.scrollTo({
+    top: chatBox.scrollHeight,
+    behavior: 'smooth'
+  });
+}
+
+/* TYPING EFFECT */
+function typeEffect(el, text) {
+  let i = 0;
+  el.innerHTML = '';
+
+  const interval = setInterval(() => {
+    el.innerHTML = marked.parse(text.slice(0, i));
+    i++;
+    scrollBottom();
+
+    if (i > text.length) clearInterval(interval);
+  }, 15);
+}
+
+/* EMOJI */
+emojiBtn.onclick = () => {
+  picker.style.display = picker.style.display === 'none' ? 'block' : 'none';
+};
+
+picker.addEventListener('emoji-click', e => {
+  input.value += e.detail.unicode;
+});
+
+/* DARK MODE */
+toggleTheme.onclick = () => {
+  document.body.classList.toggle('dark');
+};
